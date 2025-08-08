@@ -16,7 +16,7 @@ import {
     API,
 } from "../utils";
 
-import { ValidationError } from "../errors";
+import { GerstlixError, ValidationError } from "../errors";
 
 export class Gerstlix {
     private token: string;
@@ -36,11 +36,11 @@ export class Gerstlix {
             (response) => response,
             (error) => {
                 if (error.response) {
-                    throw new Error(
+                    throw new GerstlixError(
                         `API Error: ${error.response.status} ${error.response.statusText}`
                     );
                 } else if (error.request) {
-                    throw new Error("No response from server");
+                    throw new GerstlixError("No response from server");
                 }
                 throw error;
             }
@@ -48,6 +48,9 @@ export class Gerstlix {
     }
 
     private validateServer(server: number, arzOnly = false) {
+        if (typeof server !== "number") {
+            throw new ValidationError("Server must be a number");
+        }
         const list = arzOnly ? ArizonaRP : ArizonaGames;
         if (!list.includes(server as any)) {
             throw new ValidationError(`Server ${server} is not in the approved list`);
@@ -55,6 +58,9 @@ export class Gerstlix {
     }
 
     private validateProject(project: string) {
+        if (typeof project !== "string") {
+            throw new ValidationError("Project must be a string");
+        }
         if (!ProjectType.includes(project as any)) {
             throw new ValidationError(
                 `Invalid project. Use one of: ${ProjectType.join(", ")}`
@@ -85,6 +91,9 @@ export class Gerstlix {
 
     getMembers(server: ArzServerId, fractionId: number) {
         this.validateServer(server, true);
+        if (typeof fractionId !== "number") {
+            throw new ValidationError("fractionId must be a number");
+        }
         return this.request("game.getMembers", { server, fraction: fractionId });
     }
 
@@ -100,6 +109,9 @@ export class Gerstlix {
 
     getDeputy(server: ServerId, fractionId: number) {
         this.validateServer(server);
+        if (typeof fractionId !== "number") {
+            throw new ValidationError("fractionId must be a number");
+        }
         return this.request("server.getDeputy", { server, fraction: fractionId });
     }
 
@@ -110,6 +122,9 @@ export class Gerstlix {
 
     getLeader(server: ServerId, fractionId: number) {
         this.validateServer(server);
+        if (typeof fractionId !== "number") {
+            throw new ValidationError("fractionId must be a number");
+        }
         return this.request("server.getLeader", { server, fraction: fractionId });
     }
 
@@ -120,6 +135,9 @@ export class Gerstlix {
 
     getMinister(server: ServerId, fractionId: number) {
         this.validateServer(server);
+        if (typeof fractionId !== "number") {
+            throw new ValidationError("fractionId must be a number");
+        }
         return this.request("server.getMinister", { server, fraction: fractionId });
     }
 
@@ -130,6 +148,9 @@ export class Gerstlix {
 
     getRecordFraction(server: ServerId, fractionId: number) {
         this.validateServer(server);
+        if (typeof fractionId !== "number") {
+            throw new ValidationError("fractionId must be a number");
+        }
         return this.request("server.getRecord", { server, fraction: fractionId });
     }
 
@@ -157,7 +178,7 @@ export class Gerstlix {
     }
 
     geoIp(ip: string) {
-        if (!ip) throw new ValidationError("IP is required");
+        if (typeof ip !== "string" || !ip) throw new ValidationError("IP is required");
         return this.request("utils.geoIp", { ip });
     }
 }
